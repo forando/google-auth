@@ -5,7 +5,7 @@ import { fetchUserAttributes } from 'aws-amplify/auth';
 import { fetchAuthSession } from 'aws-amplify/auth'
 import { generateClient } from "aws-amplify/data";
 import '@aws-amplify/ui-react/styles.css';
-import { get } from 'aws-amplify/api';
+import { put } from 'aws-amplify/api';
 
 const client = generateClient<Schema>();
 
@@ -32,7 +32,7 @@ function App() {
     }
 
     try {
-      const restOperation = get({
+      const restOperation = put({
         apiName: 'google-auth',
         path: 'refreshtoken',
         options: {

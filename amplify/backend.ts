@@ -65,7 +65,7 @@ const cognitoAuth = new CognitoUserPoolsAuthorizer(apiStack, "CognitoAuth", {
 
 // create a new resource path with Cognito authorization
 const refreshTokenPath = googleAuthApi.root.addResource("refreshtoken");
-refreshTokenPath.addMethod("ANY", lambdaIntegration, {
+refreshTokenPath.addMethod("PUT", lambdaIntegration, {
   authorizationType: AuthorizationType.COGNITO,
   authorizer: cognitoAuth,
 });
