@@ -1,4 +1,5 @@
 import { defineAuth, secret } from '@aws-amplify/backend';
+import * as cognito from 'aws-cdk-lib/aws-cognito';
 
 /**
  * Define and configure your auth resource
@@ -35,3 +36,23 @@ export const auth = defineAuth({
     },
   }
 });
+
+export const configCustomAttributes = (userPool: cognito.CfnUserPool) => {
+  userPool.addPropertyOverride("Schema", [
+    {
+      Name: "access_token",
+      AttributeDataType: "String",
+      Mutable: true,
+    },
+    {
+      Name: "id_token",
+      AttributeDataType: "String",
+      Mutable: true,
+    },
+    {
+      Name: "refresh_token",
+      AttributeDataType: "String",
+      Mutable: true,
+    },
+  ]);
+};
