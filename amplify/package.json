@@ -1,6 +1,7 @@
 {
   "type": "module",
   "scripts": {
+    "compile": "tsc",
     "test": "jest"
   },
   "devDependencies": {
