@@ -4,11 +4,9 @@ import { Database } from './db/resource';
 
 import { apiFunction } from "./functions/api-function/resource";
 import {auth, configCustomAttributes} from './auth/resource';
-import { data } from './data/resource';
 
 const backend = defineBackend({
   auth,
-  data,
   apiFunction
 });
 
