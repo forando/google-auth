@@ -3,10 +3,10 @@ import { defineBackend } from '@aws-amplify/backend';
 // import { Database } from './db/resource';
 
 // import { apiFunction } from "./functions/api-function/resource";
-import {auth} from './auth/resource';
+// import {auth} from './auth/resource';
 
 defineBackend({
-  auth,
+  // auth,
   // apiFunction
 });
 
