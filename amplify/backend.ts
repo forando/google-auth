@@ -2,7 +2,7 @@ import { defineBackend } from '@aws-amplify/backend';
 import { Api } from './api/resource';
 import { Database } from './db/resource';
 
-import { apiFunction } from "./functions/api-function/resource";
+import { apiFunction, configureDatabaseEnvForFunction } from "./functions/api-function/resource";
 import { auth, configCustomAttributes } from './auth/resource';
 
 const backend = defineBackend({
@@ -10,20 +10,25 @@ const backend = defineBackend({
   apiFunction
 });
 
+const apiFnResources = backend.apiFunction.resources;
+const authResources = backend.auth.resources;
+
 // extract L1 CfnUserPool resources
 const { cfnUserPool } = backend.auth.resources.cfnResources;
 configCustomAttributes(cfnUserPool);
 
 const apiStack = backend.createStack("api-stack");
 const api = new Api(apiStack, {
-    lambda: backend.apiFunction.resources.lambda,
-    userPool: backend.auth.resources.userPool,
+    lambda: apiFnResources.lambda,
+    userPool: authResources.userPool,
 });
 
 const dbStack = backend.createStack("db-stack");
 const db = new Database(dbStack, {
-  lambda: backend.apiFunction.resources.lambda,
+  lambda: apiFnResources.lambda,
 });
+
+configureDatabaseEnvForFunction(apiFnResources.cfnResources.cfnFunction, db.table.tableName);
 
 // add outputs to the configuration file
 backend.addOutput({
