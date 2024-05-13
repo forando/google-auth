@@ -25,5 +25,5 @@ jobs:
           npm ci
       - name: Deploy Backend
         run: npx ampx pipeline-deploy --branch ${{ github.event.repository.default_branch }} --app-id ${{ secrets.AMPLIFY_APP_ID }}
-#      - name: Deploy Frontend
-#        run: curl -X POST -d {} "https://webhooks.amplify.eu-central-1.amazonaws.com/prod/webhooks?id=55346978-477f-4ac7-b154-5cab05a50205&token=W7P40uJw9UUBigmc8hjM2XKLttMYwd8fTrCFiGhWJs&operation=startbuild" -H "Content-Type:application/json"
+      - name: Deploy Frontend
+        run: curl -X POST -d {} "https://webhooks.amplify.eu-central-1.amazonaws.com/prod/webhooks?id=65a3fc0b-d547-48e5-a908-516582abd70b&token=rnWOMeoYeotkojV8j0jnXKTED25VmJ7oPUJaYie2mo&operation=startbuild" -H "Content-Type:application/json"
