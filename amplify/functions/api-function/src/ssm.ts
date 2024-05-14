@@ -5,7 +5,7 @@ import {
     Parameter,
     ParameterType, ParameterTier
 } from '@aws-sdk/client-ssm';
-import { env } from '$amplify/env/api-function';
+// import { env } from '$amplify/env/api-function';
 
 const ssmClient = new SSMClient({});
 
@@ -25,7 +25,7 @@ export async function getRefreshToken() {
 }
 
 async function getSsmParams() {
-    const paramPrefix = `/amplify/shared/${env.APP_ID}/`;
+    const paramPrefix = `/amplify/shared/${process.env.APP_ID}/`;
 
     console.log("trying to get params with prefix:", paramPrefix);
 
@@ -50,7 +50,7 @@ export async function putRefreshTokenToSSM(token: string) {
 
     try {
         const params = {
-            Name:  `/amplify/shared/${env.APP_ID}/GOOGLE_REFRESH_TOKEN`,
+            Name:  `/amplify/shared/${process.env.APP_ID}/GOOGLE_REFRESH_TOKEN`,
             Value: token,
             Overwrite: true,
             Tags: [],
