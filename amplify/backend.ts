@@ -28,7 +28,9 @@ const db = new Database(dbStack, {
   lambda: apiFnResources.lambda,
 });
 
-configureDatabaseEnvForFunction(apiFnResources.cfnResources.cfnFunction, db.table.tableName);
+const tableName = db.table.tableName;
+
+configureDatabaseEnvForFunction(apiFnResources.cfnResources.cfnFunction, tableName);
 
 // add outputs to the configuration file
 backend.addOutput({
@@ -41,7 +43,7 @@ backend.addOutput({
       },
     },
     DB: {
-      table: db.table.tableName,
+      table: tableName,
     },
   },
 });
