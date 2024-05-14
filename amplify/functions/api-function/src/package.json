@@ -1,0 +1,13 @@
+{
+  "name": "apifunction",
+  "version": "1.0.0",
+  "description": "handles api requests",
+  "main": "handler.js",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@aws-sdk/client-ssm": "^3.575.0"
+  },
+  "devDependencies": {
+    "@aws-sdk/types": "^3.575.0"
+  }
+}

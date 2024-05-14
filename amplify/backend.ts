@@ -2,12 +2,16 @@ import { defineBackend } from '@aws-amplify/backend';
 import { Api } from './api/resource';
 import { Database } from './db/resource';
 
-import { apiFunction, configureDatabaseEnvForFunction } from "./functions/api-function/resource";
+import {
+  apiFunction,
+  grantSSMAccess,
+  configureDatabaseEnvForFunction
+} from "./functions/api-function/resource";
 import { auth, configCustomAttributes } from './auth/resource';
 
 const backend = defineBackend({
   auth,
-  apiFunction
+  apiFunction,
 });
 
 const apiFnResources = backend.apiFunction.resources;
@@ -30,6 +34,7 @@ const db = new Database(dbStack, {
 
 const tableName = db.table.tableName;
 
+grantSSMAccess(apiFnResources.lambda, apiStack);
 configureDatabaseEnvForFunction(apiFnResources.cfnResources.cfnFunction, tableName);
 
 // add outputs to the configuration file
