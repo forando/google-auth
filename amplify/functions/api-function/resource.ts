@@ -23,7 +23,7 @@ export const grantSSMAccess = (lambda: IFunction, stack: Stack) => {
             "ssm:PutParameter",
             "ssm:GetParametersByPath"
         ],
-        resources: [`arn:aws:ssm:${stack.region}:${stack.account}:parameter/amplify/shared/*`],
+        resources: [`arn:aws:ssm:${stack.region}:${stack.account}:parameter/amplify/shared/${secret('APP_ID')}`],
     });
 
 
