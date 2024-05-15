@@ -1,17 +1,42 @@
 import type { APIGatewayProxyHandler } from "aws-lambda";
-import { getRefreshToken } from "./ssm";
+import { getRefreshToken, putRefreshTokenToSSM } from "./ssm";
 
 export const handler: APIGatewayProxyHandler = async (event) => {
-    console.log("event", event.body);
-    const refreshToken = await getRefreshToken();
-    const result = {refreshToken, tableName: process.env.TABLE_NAME};
-    return {
-        statusCode: 200,
-        // Modify the CORS settings below to match your specific requirements
-        headers: {
-            "Access-Control-Allow-Origin": "*", // Restrict this to domains you trust
-            "Access-Control-Allow-Headers": "*", // Specify only the headers you need to allow
-        },
-        body: JSON.stringify(result),
-    };
+    if(!event.body) {
+        return {
+            headers: {
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Headers": "*",
+            },
+            statusCode: 400,
+            body: JSON.stringify({ error: "Missing request body" }),
+        };
+    }
+
+    try {
+        const newToken = JSON.parse(event.body).token;
+        const token = await getRefreshToken();
+        if(newToken && newToken !== token) {
+            console.log("Updating refresh token");
+            await putRefreshTokenToSSM(newToken);
+        }
+        return {
+            statusCode: 200,
+            headers: {
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Headers": "*",
+            },
+            body: JSON.stringify({ success: "Refresh token updated", data: {status: "success"} }),
+        };
+    } catch (err) {
+        console.log("Error:", err);
+        return {
+            statusCode: 500,
+            headers: {
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Headers": "*",
+            },
+            body: JSON.stringify({ error: err, data: {status: "error"} }),
+        };
+    }
 };

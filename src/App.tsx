@@ -1,52 +1,61 @@
-import { Authenticator } from '@aws-amplify/ui-react';
+import { Authenticator, Button, Heading } from '@aws-amplify/ui-react';
 import { fetchUserAttributes } from 'aws-amplify/auth';
-import { fetchAuthSession } from 'aws-amplify/auth'
 import '@aws-amplify/ui-react/styles.css';
 import { put } from 'aws-amplify/api';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import logo from './assets/logo.svg';
+import './App.css';
 
 function App() {
 
-  async function callApi() {
-    const session = await fetchAuthSession();
-    const token = session.tokens?.idToken?.toString();
+  async function updateToken() {
+    const attributes = await fetchUserAttributes();
+    const refreshToken = attributes['custom:refresh_token'];
 
-    if(!token) {
-        console.error('No token found');
+    if(!refreshToken) {
+        toast.error('No refresh token found', {
+          position: 'top-right'
+        });
+        console.log('No refresh token found');
         return;
     }
 
     try {
       const restOperation = put({
         apiName: 'google-auth',
-        path: 'refreshtoken'
+        path: 'refreshtoken',
+        options: {
+          body: {token: refreshToken}
+        }
       });
       const response = await restOperation.response;
+      toast.success('Token updated!', {
+        position: 'top-right'
+      });
       console.log('GET call succeeded: ', await response.body.text());
     } catch (error) {
       console.log('GET call failed: ', error);
+      toast.error('Error updating token', {
+        position: 'top-right'
+      });
     }
   }
 
   return (
       <Authenticator socialProviders={['google']}>
-        {({signOut, user}) => (
-
-            <main>
-              <h1>Hello {user?.username}</h1>
-              <button onClick={signOut}>SignOut</button>
-              <button onClick={async () => {
-                console.log("User:", await fetchUserAttributes());
-              }}>Log User
-              </button>
-              <button onClick={callApi}>Invoke API</button>
-              <div>
-                🥳 App successfully hosted. Try creating a new todo.
-                <br/>
-                <a href="https://next-release-dev.d1ywzrxfkb9wgg.amplifyapp.com/react/start/quickstart/vite-react-app/#step-2-add-delete-to-do-functionality">
-                  Review next step of this tutorial.
-                </a>
-              </div>
-            </main>
+        {({signOut}) => (
+            <div className="App">
+              <header className="App-header">
+                <img src={logo} className="App-logo" alt="logo" />
+                <div className='container'>
+                  <Heading level={1}>Token Provider</Heading>
+                  <Button onClick={signOut} className='button'>Sign out</Button>
+                  <Button onClick={updateToken} className='button'>Save refresh_token</Button>
+                </div>
+                <ToastContainer />
+              </header>
+            </div>
         )}
       </Authenticator>
   )
