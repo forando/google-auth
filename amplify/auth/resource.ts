@@ -1,6 +1,10 @@
 import { defineAuth, secret } from '@aws-amplify/backend';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
 
+export enum UserGroup {
+    ADMINS = 'ADMINS',
+}
+
 /**
  * Define and configure your auth resource
  * @see https://docs.amplify.aws/gen2/build-a-backend/auth
@@ -34,7 +38,8 @@ export const auth = defineAuth({
       ],
       logoutUrls: ['http://localhost:5173/', 'https://main.d1usx0w4bl28pz.amplifyapp.com'],
     },
-  }
+  },
+  groups: [UserGroup.ADMINS],
 });
 
 export const configCustomAttributes = (userPool: cognito.CfnUserPool) => {

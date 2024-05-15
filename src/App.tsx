@@ -18,12 +18,7 @@ function App() {
     try {
       const restOperation = put({
         apiName: 'google-auth',
-        path: 'refreshtoken',
-        options: {
-          headers: {
-            Authorization: token
-          }
-        }
+        path: 'refreshtoken'
       });
       const response = await restOperation.response;
       console.log('GET call succeeded: ', await response.body.text());

@@ -2,9 +2,9 @@ import { Construct } from 'constructs';
 import { Stack } from "aws-cdk-lib";
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
+import { IRole, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import {
     AuthorizationType,
-    CognitoUserPoolsAuthorizer,
     Cors,
     LambdaIntegration,
     RestApi,
@@ -13,6 +13,7 @@ import {
 export interface ApiProps {
     lambda: lambda.IFunction;
     userPool: cognito.IUserPool;
+    adminRole: IRole;
 }
 
 export class Api {
@@ -27,7 +28,7 @@ export class Api {
             deploy: true,
             defaultCorsPreflightOptions: {
                 allowOrigins: Cors.ALL_ORIGINS, // Restrict this to domains you trust
-                allowMethods: Cors.ALL_METHODS, // Specify only the methods you need to allow
+                allowMethods: ["PUT"], // Specify only the methods you need to allow
                 allowHeaders: Cors.DEFAULT_HEADERS, // Specify only the headers you need to allow
             },
         });
@@ -37,17 +38,24 @@ export class Api {
             props.lambda
         );
 
-        // create a new Cognito User Pools authorizer
-        const cognitoAuth = new CognitoUserPoolsAuthorizer(scope, "CognitoAuth", {
-            cognitoUserPools: [props.userPool],
-        });
-
         // create a new resource path with Cognito authorization
         const refreshTokenPath = googleAuthApi.root.addResource("refreshtoken");
         refreshTokenPath.addMethod("PUT", lambdaIntegration, {
-            authorizationType: AuthorizationType.COGNITO,
-            authorizer: cognitoAuth,
+            authorizationType: AuthorizationType.IAM
         });
+
+        const apiRestPolicy = new Policy(scope, "RestApiPolicy", {
+            statements: [
+                new PolicyStatement({
+                    actions: ["execute-api:Invoke"],
+                    resources: [
+                        `${googleAuthApi.arnForExecuteApi("PUT", "/refreshtoken", "*")}`,
+                    ],
+                }),
+            ],
+        });
+
+        props.adminRole.attachInlinePolicy(apiRestPolicy);
 
         this.endpoint = googleAuthApi.url;
         this.name = googleAuthApi.restApiName;

@@ -7,7 +7,7 @@ import {
   grantSSMAccess,
   configureDatabaseEnvForFunction
 } from "./functions/api-function/resource";
-import { auth, configCustomAttributes } from './auth/resource';
+import { auth, configCustomAttributes, UserGroup } from './auth/resource';
 
 const backend = defineBackend({
   auth,
@@ -17,6 +17,8 @@ const backend = defineBackend({
 const apiFnResources = backend.apiFunction.resources;
 const authResources = backend.auth.resources;
 
+const adminRole = authResources.groups[UserGroup.ADMINS].role;
+
 // extract L1 CfnUserPool resources
 const { cfnUserPool } = backend.auth.resources.cfnResources;
 configCustomAttributes(cfnUserPool);
@@ -25,6 +27,7 @@ const apiStack = backend.createStack("api-stack");
 const api = new Api(apiStack, {
     lambda: apiFnResources.lambda,
     userPool: authResources.userPool,
+    adminRole,
 });
 
 const dbStack = backend.createStack("db-stack");
