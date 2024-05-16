@@ -38,6 +38,8 @@ and add [Authorization Scopes](https://developers.google.com/photos/library/guid
 This solution is configured to get access to Google Photos and Youtube Libraries. So the scopes would be:
   - `https://www.googleapis.com/auth/photoslibrary.readonly`
   - `https://www.googleapis.com/auth/youtube.readonly`
+- __Caveat__: You will need to add your Google account to the list of test users in the Google Developer Console 
+in order to allow those scopes.
 - Setup secrets:
   - `APP_ID`: Amplify App ID
   - `GOOGLE_CLIENT_ID`: Google App ID
