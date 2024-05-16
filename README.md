@@ -15,6 +15,20 @@ This is not safe and not recommended. This app allows you to keep your Google Au
 
 ## Architecture
 ![Google Auth Token Manager](google_auth.jpg "Google Auth Token Manager")
+### Phase One
+User installs the webb app onto their phone and enables Push Notifications. Then the flow goes as follows:
+
+- (a, b) User logs in with their Google Account and authorizes the app to access their Google Photos and Youtube Libraries.
+As a result user obtains the Google Auth Tokens (including __refresh_token__).
+- (c, d) User submits the Google Auth __refresh_token__ to the AWS SSM Parameter Store where it is kept securely.
+
+### Phase Two
+On a periodic basis (every 45 minutes) a dedicated lambda function refreshes Google Auth Token using __refresh_token__ 
+and stores it in the DynamoDB database. If the __refresh_token__ is invalid the user is notified via Push Notification
+so that they can re-authorize the app repeating the __Phase One__.
+
+### Finally
+Any other app that requires Google Auth Token can obtain it from the DynamoDB database.
 
 ## Prerequisites
 In order to deploy the solution you need to have the following:
