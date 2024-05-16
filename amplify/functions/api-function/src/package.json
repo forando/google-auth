@@ -1,13 +1,18 @@
 {
-  "name": "apifunction",
+  "name": "api-handler",
   "version": "1.0.0",
   "description": "handles api requests",
   "main": "handler.js",
   "license": "Apache-2.0",
   "dependencies": {
-    "@aws-sdk/client-ssm": "^3.575.0"
+    "@aws-sdk/client-ssm": "^3.575.0",
+    "aws-serverless-express": "^3.4.0",
+    "body-parser": "^1.20.2",
+    "express": "^4.19.2"
   },
   "devDependencies": {
-    "@aws-sdk/types": "^3.575.0"
+    "@aws-sdk/types": "^3.575.0",
+    "@types/aws-lambda": "^8.10.138",
+    "@types/aws-serverless-express": "^3.3.9"
   }
 }

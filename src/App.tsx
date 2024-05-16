@@ -1,7 +1,7 @@
 import { Authenticator, Button, Heading } from '@aws-amplify/ui-react';
 import { fetchUserAttributes } from 'aws-amplify/auth';
 import '@aws-amplify/ui-react/styles.css';
-import { put } from 'aws-amplify/api';
+import { ApiError, put } from 'aws-amplify/api';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import logo from './assets/logo.svg';
@@ -33,9 +33,21 @@ function App() {
       toast.success('Token updated!', {
         position: 'top-right'
       });
-      console.log('GET call succeeded: ', await response.body.text());
+      console.log('PUT call on /refreshtoken succeeded: ', await response.body.text());
     } catch (error) {
-      console.log('GET call failed: ', error);
+      if(error instanceof ApiError) {
+        if (error.response) {
+          const {
+            statusCode,
+            body
+          } = error.response;
+          console.error(`PUT call on /refreshtoken got ${statusCode} error response with payload: ${body}`);
+        } else {
+          console.log('PUT call on /refreshtoken failed: ', error.message);
+        }
+      } else {
+        console.log('PUT call on /refreshtoken failed: ', error);
+      }
       toast.error('Error updating token', {
         position: 'top-right'
       });
@@ -44,14 +56,14 @@ function App() {
 
   return (
       <Authenticator socialProviders={['google']}>
-        {({signOut}) => (
+        {({signOut, user}) => (
             <div className="App">
               <header className="App-header">
                 <img src={logo} className="App-logo" alt="logo" />
                 <div className='container'>
-                  <Heading level={1}>Token Provider</Heading>
+                  <Heading level={1}>Google Auth</Heading>
                   <Button onClick={signOut} className='button'>Sign out</Button>
-                  <Button onClick={updateToken} className='button'>Save refresh_token</Button>
+                  {user && <Button onClick={updateToken} className='button'>Save refresh_token</Button>}
                 </div>
                 <ToastContainer />
               </header>
