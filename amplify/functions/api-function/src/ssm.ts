@@ -9,7 +9,30 @@ import { env } from '$amplify/env/api-function';
 
 const ssmClient = new SSMClient({});
 
-export async function getRefreshToken() {
+export type WebPushKeys = {
+    public: string | undefined;
+    private: string | undefined;
+};
+
+export async function getWebPushKeys(): Promise<WebPushKeys | null> {
+
+    try {
+        const params = await getSsmParams();
+
+        if (!params) {
+            return null;
+        }
+        return {
+            public: params['WEB_PUSH_PUBLIC_KEY'],
+            private: params['WEB_PUSH_PRIVATE_KEY']
+        };
+    } catch(err) {
+        console.log("Cannot get SSM Params:", err);
+        return null
+    }
+}
+
+export async function getRefreshToken(): Promise<string | null> {
 
     try {
         const params = await getSsmParams();

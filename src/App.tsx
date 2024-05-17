@@ -1,7 +1,7 @@
 import { Authenticator, Button, Heading } from '@aws-amplify/ui-react';
 import { fetchUserAttributes } from 'aws-amplify/auth';
 import '@aws-amplify/ui-react/styles.css';
-import { ApiError, put } from 'aws-amplify/api';
+import { ApiError, put, get } from 'aws-amplify/api';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import logo from './assets/logo.svg';
@@ -54,6 +54,32 @@ function App() {
     }
   }
 
+  async function getWebPushPubKey() {
+
+    try {
+      const restOperation = get({
+        apiName: 'google-auth',
+        path: 'webpush/pubkey'
+      });
+      const response = await restOperation.response;
+      console.log('PUT call on /webpush/pubkey succeeded: ', await response.body.text());
+    } catch (error) {
+      if(error instanceof ApiError) {
+        if (error.response) {
+          const {
+            statusCode,
+            body
+          } = error.response;
+          console.error(`PUT call on /webpush/pubkey got ${statusCode} error response with payload: ${body}`);
+        } else {
+          console.log('PUT call on /webpush/pubkey failed: ', error.message);
+        }
+      } else {
+        console.log('PUT call on /webpush/pubkey failed: ', error);
+      }
+    }
+  }
+
   return (
       <Authenticator socialProviders={['google']}>
         {({signOut, user}) => (
@@ -64,6 +90,7 @@ function App() {
                   <Heading level={1}>Google Auth</Heading>
                   <Button onClick={signOut} className='button'>Sign out</Button>
                   {user && <Button onClick={updateToken} className='button'>Save refresh_token</Button>}
+                  {user && <Button onClick={getWebPushPubKey} className='button'>Get Web Push Key</Button>}
                 </div>
                 <ToastContainer />
               </header>

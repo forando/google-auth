@@ -44,12 +44,19 @@ export class Api {
             authorizationType: AuthorizationType.IAM
         });
 
+        const webPushPath = googleAuthApi.root.addResource("webpush");
+        const pubKeyPath = webPushPath.addResource("pubkey");
+        pubKeyPath.addMethod("GET", lambdaIntegration, {
+            authorizationType: AuthorizationType.IAM
+        });
+
         const apiRestPolicy = new Policy(scope, "RestApiPolicy", {
             statements: [
                 new PolicyStatement({
                     actions: ["execute-api:Invoke"],
                     resources: [
                         `${googleAuthApi.arnForExecuteApi("PUT", "/refreshtoken", "*")}`,
+                        `${googleAuthApi.arnForExecuteApi("GET", "/webpush/pubkey", "*")}`,
                     ],
                 }),
             ],

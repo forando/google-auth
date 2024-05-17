@@ -40,10 +40,13 @@ This solution is configured to get access to Google Photos and Youtube Libraries
   - `https://www.googleapis.com/auth/youtube.readonly`
 - __Caveat__: You will need to add your Google account to the list of test users in the Google Developer Console 
 in order to allow those scopes.
+- Generate web push keys with `npx web-push@latest generate-vapid-keys`
 - Setup secrets:
   - `APP_ID`: Amplify App ID
   - `GOOGLE_CLIENT_ID`: Google App ID
   - `GOOGLE_CLIENT_SECRET`: Google App Secret
+  - `WEB_PUSH_PUBLIC_KEY`: Public Key for web push 
+  - `WEB_PUSH_PRIVATE_KEY`: Private Key for web push
 - Connect the repository to the Amplify app.
 
 ## Sandbox Environment
