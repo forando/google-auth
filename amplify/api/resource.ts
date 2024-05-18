@@ -49,6 +49,17 @@ export class Api {
         pubKeyPath.addMethod("GET", lambdaIntegration, {
             authorizationType: AuthorizationType.IAM
         });
+        const subscriptionProxy = webPushPath
+            .addResource("subscription")
+            .addProxy({
+                defaultIntegration: lambdaIntegration,
+                defaultMethodOptions: {
+                    authorizationType: AuthorizationType.IAM
+                }
+            });
+        subscriptionProxy.addMethod("GET");
+        subscriptionProxy.addMethod("PUT");
+        subscriptionProxy.addMethod("DELETE");
 
         const apiRestPolicy = new Policy(scope, "RestApiPolicy", {
             statements: [
@@ -57,6 +68,9 @@ export class Api {
                     resources: [
                         `${googleAuthApi.arnForExecuteApi("PUT", "/refreshtoken", "*")}`,
                         `${googleAuthApi.arnForExecuteApi("GET", "/webpush/pubkey", "*")}`,
+                        `${googleAuthApi.arnForExecuteApi("GET", "/webpush/subscription/*", "*")}`,
+                        `${googleAuthApi.arnForExecuteApi("PUT", "/webpush/subscription/*", "*")}`,
+                        `${googleAuthApi.arnForExecuteApi("DELETE", "/webpush/subscription/*", "*")}`,
                     ],
                 }),
             ],

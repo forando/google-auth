@@ -11,8 +11,9 @@ export const apiFunction = defineFunction({
     }
 });
 
-export const configureDatabaseEnvForFunction = (lambda: CfnFunction, tableName: string) => {
+export const configureDatabaseEnvForFunction = (lambda: CfnFunction, tableName: string, tableRegion: string) => {
     lambda.addPropertyOverride("Environment.Variables.TABLE_NAME", tableName);
+    lambda.addPropertyOverride("Environment.Variables.TABLE_REGION", tableRegion);
 };
 
 export const grantSSMAccess = (lambda: IFunction, stack: Stack) => {

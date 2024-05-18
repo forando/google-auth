@@ -13,6 +13,7 @@ export class Database {
     constructor(scope: Construct, props: DbProps) {
         this.table = new dynamodb.Table(scope, 'google-token', {
             partitionKey: {name: 'PK', type: dynamodb.AttributeType.STRING},
+            sortKey: {name: 'SK', type: dynamodb.AttributeType.STRING},
             removalPolicy: cdk.RemovalPolicy.DESTROY,
             readCapacity: 5
         });

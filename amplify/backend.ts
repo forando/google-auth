@@ -38,7 +38,7 @@ const db = new Database(dbStack, {
 const tableName = db.table.tableName;
 
 grantSSMAccess(apiFnResources.lambda, apiStack);
-configureDatabaseEnvForFunction(apiFnResources.cfnResources.cfnFunction, tableName);
+configureDatabaseEnvForFunction(apiFnResources.cfnResources.cfnFunction, tableName, dbStack.region);
 
 // add outputs to the configuration file
 backend.addOutput({
