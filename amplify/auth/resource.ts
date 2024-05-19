@@ -33,11 +33,12 @@ export const auth = defineAuth({
         ],
       },
       callbackUrls: [
+        'http://localhost:3000/profile',
         'http://localhost:4173/profile',
         'http://localhost:5173/profile',
         'https://main.d1usx0w4bl28pz.amplifyapp.com/profile'
       ],
-      logoutUrls: ['http://localhost:5173/', 'http://localhost:5173/', 'https://main.d1usx0w4bl28pz.amplifyapp.com'],
+      logoutUrls: ['http://localhost:3000/', 'http://localhost:4173/', 'http://localhost:5173/', 'https://main.d1usx0w4bl28pz.amplifyapp.com'],
     },
   },
   groups: [UserGroup.ADMINS],

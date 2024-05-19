@@ -1,7 +1,7 @@
-import { fetchUserAttributes } from 'aws-amplify/auth';
-import { ApiError, put, get } from 'aws-amplify/api';
-import { encode } from "universal-base64url";
-import { toast } from 'react-toastify';
+import {fetchUserAttributes, getCurrentUser} from 'aws-amplify/auth';
+import {ApiError, del, get, put} from 'aws-amplify/api';
+import {encode} from "universal-base64url";
+import {toast} from 'react-toastify';
 
 export async function updateToken() {
     const attributes = await fetchUserAttributes();
@@ -48,7 +48,7 @@ export async function updateToken() {
     }
 }
 
-export async function getWebPushPubKey() {
+export async function getWebPushPubKey(): Promise<string | null> {
 
     try {
         const restOperation = get({
@@ -56,7 +56,10 @@ export async function getWebPushPubKey() {
             path: 'webpush/pubkey'
         });
         const response = await restOperation.response;
-        console.log('GET call on /webpush/pubkey succeeded: ', await response.body.text());
+        const body = await response.body.json();
+        console.log(body);
+        // @ts-ignore
+        return body["data"];
     } catch (error) {
         if(error instanceof ApiError) {
             if (error.response) {
@@ -71,23 +74,26 @@ export async function getWebPushPubKey() {
         } else {
             console.log('GET call on /webpush/pubkey failed: ', error);
         }
+        return null;
     }
 }
 
-export async function updateSubscription() {
+export async function saveUserSubscription(subscription: PushSubscription) {
     try {
+        const user = await getUser();
         const restOperation = put({
             apiName: 'google-auth',
-            path: 'webpush/subscription/12345',
+            path: `webpush/subscription/${user.username}`,
             options: {
-                body: { id: 12345, endpoint: 'q2ef/qwerty' }
+                // @ts-ignore
+                body: subscription.toJSON()
             }
         });
         const response = await restOperation.response;
         toast.success('Subscription updated!', {
             position: 'top-right'
         });
-        console.log('PUT call on /webpush/subscription succeeded: ', await response.body.text());
+        console.log('PUT call on /webpush/subscription succeeded: ', await response.body.json());
     } catch (error) {
         if(error instanceof ApiError) {
             if (error.response) {
@@ -108,16 +114,20 @@ export async function updateSubscription() {
     }
 }
 
-export async function getSubscription() {
+export async function fetchUserSubscription(subscription: PushSubscription) {
+
+    const uri = await createSubscriptionUri(subscription);
+    if (!uri) {
+        return null;
+    }
 
     try {
-        const id = encode("qwerty");
         const restOperation = get({
             apiName: 'google-auth',
-            path: `webpush/subscription/12345/${id}`
+            path: uri
         });
         const response = await restOperation.response;
-        console.log('GET call on /webpush/subscription succeeded: ', await response.body.text());
+        return await response.body.json();
     } catch (error) {
         if(error instanceof ApiError) {
             if (error.response) {
@@ -125,12 +135,69 @@ export async function getSubscription() {
                     statusCode,
                     body
                 } = error.response;
-                console.error(`GET call on /webpush/subscription got ${statusCode} error response with payload: ${body}`);
+                console.error(`GET call on ${uri} got ${statusCode} error response with payload: ${body}`);
             } else {
-                console.log('GET call on /webpush/subscription failed: ', error.message);
+                console.log(`GET call on ${uri} failed: `, error.message);
             }
         } else {
-            console.log('GET call on /webpush/subscription failed: ', error);
+            console.log(`GET call on ${uri} failed: `, error);
+        }
+        return null;
+    }
+}
+
+export async function deleteUserSubscription(subscription: PushSubscription) {
+
+    const uri = await createSubscriptionUri(subscription);
+    if (!uri) {
+        return null;
+    }
+
+    try {
+        const restOperation = del({
+            apiName: 'google-auth',
+            path: uri
+        });
+        await restOperation.response;
+    } catch (error) {
+        if(error instanceof ApiError) {
+            if (error.response) {
+                const {
+                    statusCode,
+                    body
+                } = error.response;
+                console.error(`DELETE call on ${uri} got ${statusCode} error response with payload: ${body}`);
+            } else {
+                console.log(`DELETE call on ${uri} failed: `, error.message);
+            }
+        } else {
+            console.log(`DELETE call on ${uri} failed: `, error);
         }
     }
+}
+
+async function createSubscriptionUri(subscription: PushSubscription | undefined | null) {
+    if(!subscription?.endpoint) {
+        console.log('No endpoint in subscription', subscription)
+        return null;
+    }
+
+    const subscriptionId = subscription.endpoint.split("/").pop();
+    if(!subscriptionId) {
+        console.log("Malformed subscription endpoint:", subscription.endpoint);
+        return null;
+    }
+
+    const user = await getUser();
+    if(!user) {
+        console.log("User not defined");
+        return null;
+    }
+
+    const id = encode(subscriptionId);
+    return `webpush/subscription/${user.username}/${id}`;
+}
+
+async function getUser() {
+    return await getCurrentUser();
 }

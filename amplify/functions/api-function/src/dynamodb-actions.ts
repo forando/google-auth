@@ -23,8 +23,6 @@ export async function getEntity(keys: Keys) {
         Key: keys
     }
 
-    console.log("Params:", params);
-
     return await ddbDocClient.send(new GetCommand(params));
 }
 
