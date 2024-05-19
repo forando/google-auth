@@ -23,6 +23,8 @@ jobs:
           npm ci
           cd amplify
           npm ci
+          cd functions/api-function/src
+          npm ci
       - name: Deploy Backend
         run: npx ampx pipeline-deploy --branch ${{ github.event.repository.default_branch }} --app-id ${{ secrets.AMPLIFY_APP_ID }}
       - name: Deploy Frontend
