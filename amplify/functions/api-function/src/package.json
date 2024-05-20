@@ -1,6 +1,7 @@
 {
   "name": "api-handler",
   "version": "1.0.0",
+  "type": "module",
   "description": "handles api requests",
   "main": "handler.js",
   "license": "Apache-2.0",
