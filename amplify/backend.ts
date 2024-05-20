@@ -51,7 +51,8 @@ configureDatabaseEnvForApiFn(apiFnResources.cfnResources.cfnFunction, tableName,
 
 grantSSMAccessForTokenRefresherFn(tokenRefresherFnResources.lambda, apiStack);
 configureDatabaseEnvForTokenRefresherFn(tokenRefresherFnResources.cfnResources.cfnFunction, tableName, dbStack.region);
-cofigureScheduledEventSourceForTokenRefresherFn(tokenRefresherFnResources.lambda, dbStack);
+const eventSourceStack = backend.createStack("event-source");
+cofigureScheduledEventSourceForTokenRefresherFn(tokenRefresherFnResources.lambda, eventSourceStack);
 
 // add outputs to the configuration file
 backend.addOutput({
