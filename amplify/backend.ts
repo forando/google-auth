@@ -13,6 +13,7 @@ import {
   grantSSMAccessForTokenRefresherFn,
   configureDatabaseEnvForTokenRefresherFn
 } from "./functions/token-refresher/resource";
+import { cofigureScheduledEventSourceForTokenRefresherFn } from './functions/token-refresher/event-source';
 import { auth, configCustomAttributes, UserGroup } from './auth/resource';
 
 const backend = defineBackend({
@@ -48,8 +49,9 @@ const tableName = db.table.tableName;
 grantSSMAccessForApiFn(apiFnResources.lambda, apiStack);
 configureDatabaseEnvForApiFn(apiFnResources.cfnResources.cfnFunction, tableName, dbStack.region);
 
-grantSSMAccessForTokenRefresherFn(tokenRefresherFnResources.lambda, apiStack);
+grantSSMAccessForTokenRefresherFn(tokenRefresherFnResources.lambda, dbStack);
 configureDatabaseEnvForTokenRefresherFn(tokenRefresherFnResources.cfnResources.cfnFunction, tableName, dbStack.region);
+cofigureScheduledEventSourceForTokenRefresherFn(tokenRefresherFnResources.lambda, dbStack);
 
 // add outputs to the configuration file
 backend.addOutput({
