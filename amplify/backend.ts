@@ -49,7 +49,7 @@ const tableName = db.table.tableName;
 grantSSMAccessForApiFn(apiFnResources.lambda, apiStack);
 configureDatabaseEnvForApiFn(apiFnResources.cfnResources.cfnFunction, tableName, dbStack.region);
 
-grantSSMAccessForTokenRefresherFn(tokenRefresherFnResources.lambda, dbStack);
+grantSSMAccessForTokenRefresherFn(tokenRefresherFnResources.lambda, apiStack);
 configureDatabaseEnvForTokenRefresherFn(tokenRefresherFnResources.cfnResources.cfnFunction, tableName, dbStack.region);
 cofigureScheduledEventSourceForTokenRefresherFn(tokenRefresherFnResources.lambda, dbStack);
 
