@@ -6,11 +6,11 @@ import {Database} from "./resource";
 test('should create DynamoDB table', () => {
     const stack = new cdk.Stack();
     new Database(stack, {
-        lambda: new lambda.Function(stack, 'TestFunction', {
+        lambdas: [new lambda.Function(stack, 'TestFunction', {
             runtime: lambda.Runtime.NODEJS_18_X,
             handler: 'hello.handler',
             code: lambda.Code.fromAsset('functions/api-function'),
-        })
+        })]
     });
 
     const template = Template.fromStack(stack);

@@ -5,7 +5,6 @@ import {
     Parameter,
     ParameterType, ParameterTier
 } from '@aws-sdk/client-ssm';
-import { env } from '$amplify/env/api-function';
 
 const ssmClient = new SSMClient({});
 
@@ -14,10 +13,16 @@ export type WebPushKeys = {
     private: string | undefined;
 };
 
-export async function getWebPushKeys(): Promise<WebPushKeys | null> {
+export type GoogleSecrets = {
+    clientId: string;
+    clientSecret: string;
+    refreshToken: string;
+};
+
+export async function getWebPushKeys(appId: string): Promise<WebPushKeys | null> {
 
     try {
-        const params = await getSsmParams();
+        const params = await getSsmParams(appId);
 
         if (!params) {
             return null;
@@ -32,10 +37,10 @@ export async function getWebPushKeys(): Promise<WebPushKeys | null> {
     }
 }
 
-export async function getRefreshToken(): Promise<string | null> {
+export async function getRefreshToken(appId: string): Promise<string | null> {
 
     try {
-        const params = await getSsmParams();
+        const params = await getSsmParams(appId);
 
         if (!params) {
             return null;
@@ -47,8 +52,36 @@ export async function getRefreshToken(): Promise<string | null> {
     }
 }
 
-async function getSsmParams() {
-    const paramPrefix = `/amplify/shared/${env.APP_ID}/`;
+export async function getGoogleSecrets(appId: string): Promise<GoogleSecrets | null> {
+
+    try {
+        const params = await getSsmParams(appId);
+
+        if (!params) {
+            return null;
+        }
+        const refreshToken = params['GOOGLE_REFRESH_TOKEN'];
+        if(!refreshToken) {
+            return null;
+        }
+        const clientId = params['GOOGLE_CLIENT_ID'];
+        if(!clientId) {
+            return null;
+        }
+        const clientSecret = params['GOOGLE_CLIENT_SECRET'];
+        if(!clientSecret) {
+            return null;
+        }
+        
+        return {clientId, clientSecret, refreshToken};
+    } catch(err) {
+        console.log("Cannot get SSM Params:", err);
+        return null
+    }
+}
+
+async function getSsmParams(appId: string) {
+    const paramPrefix = `/amplify/shared/${appId}/`;
 
     console.log("trying to get params with prefix:", paramPrefix);
 
@@ -69,11 +102,11 @@ async function getSsmParams() {
     }, {});
 }
 
-export async function putRefreshTokenToSSM(token: string) {
+export async function putRefreshTokenToSSM(token: string, appId: string) {
 
     try {
         const params = {
-            Name:  `/amplify/shared/${env.APP_ID}/GOOGLE_REFRESH_TOKEN`,
+            Name:  `/amplify/shared/${appId}/GOOGLE_REFRESH_TOKEN`,
             Value: token,
             Overwrite: true,
             Tags: [],

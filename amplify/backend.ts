@@ -3,19 +3,27 @@ import { Api } from './api/resource';
 import { Database } from './db/resource';
 
 import {
-  apiFunction,
-  grantSSMAccess,
-  configureDatabaseEnvForFunction
+  apiFn,
+  grantSSMAccessForApiFn,
+  configureDatabaseEnvForApiFn
 } from "./functions/api-function/resource";
+
+import {
+  tokenRefresherFn,
+  grantSSMAccessForTokenRefresherFn,
+  configureDatabaseEnvForTokenRefresherFn
+} from "./functions/token-refresher/resource";
 import { auth, configCustomAttributes, UserGroup } from './auth/resource';
 
 const backend = defineBackend({
   auth,
-  apiFunction,
+  apiFn,
+  tokenRefresherFn
 });
 
-const apiFnResources = backend.apiFunction.resources;
 const authResources = backend.auth.resources;
+const apiFnResources = backend.apiFn.resources;
+const tokenRefresherFnResources = backend.tokenRefresherFn.resources;
 
 const adminRole = authResources.groups[UserGroup.ADMINS].role;
 
@@ -32,13 +40,16 @@ const api = new Api(apiStack, {
 
 const dbStack = backend.createStack("db-stack");
 const db = new Database(dbStack, {
-  lambda: apiFnResources.lambda,
+  lambdas: [apiFnResources.lambda, tokenRefresherFnResources.lambda],
 });
 
 const tableName = db.table.tableName;
 
-grantSSMAccess(apiFnResources.lambda, apiStack);
-configureDatabaseEnvForFunction(apiFnResources.cfnResources.cfnFunction, tableName, dbStack.region);
+grantSSMAccessForApiFn(apiFnResources.lambda, apiStack);
+configureDatabaseEnvForApiFn(apiFnResources.cfnResources.cfnFunction, tableName, dbStack.region);
+
+grantSSMAccessForTokenRefresherFn(tokenRefresherFnResources.lambda, apiStack);
+configureDatabaseEnvForTokenRefresherFn(tokenRefresherFnResources.cfnResources.cfnFunction, tableName, dbStack.region);
 
 // add outputs to the configuration file
 backend.addOutput({

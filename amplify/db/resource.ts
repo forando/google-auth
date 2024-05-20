@@ -4,7 +4,7 @@ import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import {Construct} from "constructs";
 
 export interface DbProps {
-    lambda: lambda.IFunction;
+    lambdas: lambda.IFunction[];
 }
 
 export class Database {
@@ -18,6 +18,8 @@ export class Database {
             readCapacity: 5
         });
 
-        this.table.grantReadWriteData(props.lambda);
+        for(const lambda of props.lambdas) {
+            this.table.grantReadWriteData(lambda);
+        }
     }
 }

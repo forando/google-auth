@@ -82,20 +82,18 @@ self.addEventListener('push', function(event) {
 
     const payload = event.data?.json();
 
-    // const { title, message, link } = parsePushPayload(payload);
-
     if(!payload) {
         return;
     }
 
     const options = {
-        body: "test message",
+        body: payload.message,
         icon: 'favicon.ico',
-        data: payload
+        data: {link: origin}
     };
 
     const registration = self.registration;
-    const promise = registration.showNotification("New Notification!", options);
+    const promise = registration.showNotification(payload.title, options);
     event.waitUntil(promise);
 });
 

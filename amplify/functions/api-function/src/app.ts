@@ -2,11 +2,13 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import { decode } from 'universal-base64url';
 import awsServerlessExpressMiddleware from 'aws-serverless-express/middleware';
-import { WebPushSubscription } from './webpush-subscription';
-import { getRefreshToken, putRefreshTokenToSSM, getWebPushKeys } from "./ssm";
-import { getEntity, putEntity, deleteEntity } from './dynamodb-actions';
-import { Keys, PartitionKey, SortKey, generateKeys } from './utils';
-import { EntityError } from './entity-error';
+import { WebPushSubscription } from '../../common/webpush-subscription';
+import { getRefreshToken, putRefreshTokenToSSM, getWebPushKeys } from '../../common/ssm';
+
+import { getEntity, putEntity, deleteEntity } from '../../common/dynamodb-actions';
+import { Keys, PartitionKey, SortKey, generateKeys } from '../../common/utils';
+import { EntityError } from '../../common/entity-error';
+import { env } from '$amplify/env/api-function';
 
 const pathWebPushSubscriptions = "/webpush/subscription";
 const hashKeyPath = '/:' + PartitionKey.name;
@@ -32,10 +34,10 @@ app.put("/refreshtoken", async function (req, res) {
     }
     try {
         const newToken = req.body.token;
-        const token = await getRefreshToken();
+        const token = await getRefreshToken(env.APP_ID);
         if(newToken && newToken !== token) {
             console.log("Updating refresh token");
-            await putRefreshTokenToSSM(newToken);
+            await putRefreshTokenToSSM(newToken, env.APP_ID);
         }
         res.status(200).json({ success: true });
     } catch (err) {
@@ -47,7 +49,7 @@ app.put("/refreshtoken", async function (req, res) {
 
 app.get("/webpush/pubkey", async (req, res) => {
     try {
-        const keys = await getWebPushKeys();
+        const keys = await getWebPushKeys(env.APP_ID);
         if (!keys) {
             res.statusCode = 500;
             res.json({success: false, error: "Cannot get web push keys", url: req.url });
@@ -68,10 +70,8 @@ app.get("/webpush/pubkey", async (req, res) => {
 
 app.get(pathWebPushSubscriptions + hashKeyPath + sortKeyPath, async (req, res) => {
     try {
-        console.log("req.params:", req.params);
-        const id: string = decode(req.params[SortKey.name]);
-        const pk: PartitionKey = WebPushSubscription.generatePk(req.params[PartitionKey.name]);
-        const sk: SortKey = WebPushSubscription.generateSk(id);
+        const pk: PartitionKey = WebPushSubscription.partitionKey;
+        const sk: SortKey = WebPushSubscription.sortKey;
         const params: Keys = generateKeys(pk, sk);
 
         const getRes = await getEntity(params);
@@ -91,7 +91,7 @@ app.get(pathWebPushSubscriptions + hashKeyPath + sortKeyPath, async (req, res) =
 app.put(pathWebPushSubscriptions + hashKeyPath, async (req, res) => {
     try {
         let subToPut = null;
-        const sub = WebPushSubscription.fromUpdateDto(req.body, req.params[PartitionKey.name]);
+        const sub = WebPushSubscription.fromUpdateDto(req.body);
         const params: Keys = generateKeys(sub.pk, sub.sk);
 
         const getRes = await getEntity(params);
@@ -119,9 +119,8 @@ app.put(pathWebPushSubscriptions + hashKeyPath, async (req, res) => {
 
 app.delete(pathWebPushSubscriptions + hashKeyPath + sortKeyPath, async (req, res) => {
     try {
-        const id = decode(req.params[SortKey.name])
-        const pk = WebPushSubscription.generatePk(req.params[PartitionKey.name]);
-        const sk = WebPushSubscription.generateSk(id);
+        const pk = WebPushSubscription.partitionKey;
+        const sk = WebPushSubscription.sortKey;
         const params: Keys = generateKeys(pk, sk);
 
         const delRes = await deleteEntity(params)

@@ -1,3 +1,4 @@
+import { PushSubscription } from 'web-push';
 export class PartitionKey {
     constructor(readonly value: string) {
     }
@@ -33,7 +34,7 @@ export class SortKey {
 }
 
 export interface DynamoDBEntity {
-    get(): Json;
+    get(): KeysEntity;
 }
 
 export type Json = {
@@ -48,6 +49,12 @@ export type Keys = {
     PK: string;
     SK: string;
 };
+
+export type KeysEntity = {
+    PK: string;
+    SK: string;
+    [k: string]: any;
+}
 
 export function generateKeys(pk: PartitionKey, sk: SortKey): Keys {
     return {
