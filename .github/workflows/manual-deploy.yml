@@ -23,8 +23,10 @@ jobs:
           npm ci
           cd amplify
           npm ci
-      - name: Test
-        run: npm run test
+      - name: Test Backend Config
+        run: |
+          cd amplify
+          npm run test
       - name: Deploy Backend
         run: npx ampx pipeline-deploy --branch ${{ github.event.repository.default_branch }} --app-id ${{ secrets.AMPLIFY_APP_ID }}
       - name: Deploy Frontend
